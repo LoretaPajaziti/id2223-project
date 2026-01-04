@@ -231,3 +231,74 @@ def get_latest_complete_kp_from_nowcast() -> pd.DataFrame:
             out[col] = out[col].astype("float32")
 
     return out
+
+
+def fetch_newest_solar_data(run_date):
+
+    run_date = pd.to_datetime(run_date).date()
+    
+    ### 1. Obtain Newest data 
+    plasma_url = "https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json"
+    mag_url    = "https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json"
+
+    plasma = requests.get(plasma_url).json()
+    mag = requests.get(mag_url).json()
+
+    plasma_df = pd.DataFrame(plasma[1:], columns=plasma[0])
+    mag_df = pd.DataFrame(mag[1:], columns=mag[0])
+
+    plasma_df["time_tag"] = pd.to_datetime(plasma_df["time_tag"])
+    mag_df["time_tag"] = pd.to_datetime(mag_df["time_tag"])
+
+    df = plasma_df.merge(
+        mag_df[["time_tag", "bz_gsm"]],
+        on="time_tag",
+        how="inner",
+    )
+
+    df = df.rename(columns={
+        "time_tag": "date",
+        "speed": "vsw",
+        "density": "density",
+        "bz_gsm": "bz",
+    })
+    
+    df = df.sort_values("date").ffill()
+    df = df.dropna()
+    df.drop(columns=["temperature"], inplace=True)
+
+    numeric_cols = ["vsw", "density", "bz"]
+    df[numeric_cols] = df[numeric_cols].astype("float32")
+    
+    df["pressure"] = 1.6726e-6 * df["density"] * (df["vsw"] ** 2)
+    
+    return df
+
+def solar_feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
+    for lag in [1, 2, 3]:
+        df[f'vsw_lag{lag}'] = df['vsw'].shift(lag)
+        df[f'bz_lag{lag}'] = df['bz'].shift(lag)
+        df[f'pressure_lag{lag}'] = df['pressure'].shift(lag)
+
+    df['bz_3d_mean'] = df['bz'].rolling(3).mean()
+    df['bz_7d_min'] = df['bz'].rolling(7).min()
+
+    df['vsw_3d_mean'] = df['vsw'].rolling(3).mean()
+    df['pressure_3d_max'] = df['pressure'].rolling(3).max()
+
+    df['vbz'] = df['vsw'] * df['bz']
+    df['vbz_neg'] = df['vsw'] * df['bz'].clip(upper=0)
+
+    float_cols = df.select_dtypes("float").columns
+    df[float_cols] = df[float_cols].astype("float32")
+
+    before = len(df)
+
+    df = df.dropna().reset_index(drop=True)
+
+    after = len(df)
+
+    print(f"🧹 Dropped {before - after} rows due to NaNs")
+    print(f"📊 Remaining rows: {after}")
+    
+    return df
