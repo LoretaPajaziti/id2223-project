@@ -143,10 +143,55 @@
         days
       </div>
 
-      <!-- CURRENT CONDITIONS -->
-      <div class="aurora-card">
-        <h3>Latest Conditions</h3>
-        <div class="context-grid" id="contextGrid"></div>
+      <!-- Latest conditions -->
+      <div class="aurora-card" style="margin-bottom: 2rem">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          "
+        >
+          <button id="prevDay" style="font-size: 1.4rem">←</button>
+
+          <div style="text-align: center">
+            <div style="font-size: 0.9rem; color: #9aa4ff">
+              Observed conditions
+            </div>
+            <div
+              id="ctx-date"
+              style="font-size: 1.3rem; font-weight: 600"
+            ></div>
+          </div>
+
+          <button id="nextDay" style="font-size: 1.4rem">→</button>
+        </div>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+          "
+        >
+          <div>
+            <div style="font-size: 0.85rem; color: #8a8fae">Ap index</div>
+            <div id="ctx-ap" style="font-size: 1.4rem"></div>
+          </div>
+          <div>
+            <div style="font-size: 0.85rem; color: #8a8fae">Kp max</div>
+            <div id="ctx-kp" style="font-size: 1.4rem"></div>
+          </div>
+          <div>
+            <div style="font-size: 0.85rem; color: #8a8fae">Cloud cover</div>
+            <div id="ctx-cloud" style="font-size: 1.4rem"></div>
+          </div>
+          <div>
+            <div style="font-size: 0.85rem; color: #8a8fae">Precipitation</div>
+            <div id="ctx-rain" style="font-size: 1.4rem"></div>
+          </div>
+        </div>
       </div>
 
       <!-- FORECAST PLOT -->
@@ -223,41 +268,99 @@
     </div>
 
     <script>
+      let contextData = [];
+      let ctxIndex = 0;
+
+      function renderContext() {
+        const c = contextData[ctxIndex];
+
+        document.getElementById("ctx-date").textContent = c.date;
+        document.getElementById("ctx-ap").textContent =
+          c.geomagnetic.ap.toFixed(1);
+        document.getElementById("ctx-kp").textContent =
+          c.geomagnetic.kp_max.toFixed(2);
+        document.getElementById("ctx-cloud").textContent =
+          c.weather.cloud_cover.toFixed(1) + "%";
+        document.getElementById("ctx-rain").textContent =
+          c.weather.precipitation.toFixed(1) + " mm";
+      }
+
+      fetch("./assets/context.json")
+        .then((res) => res.json())
+        .then((data) => {
+          contextData = data;
+          ctxIndex = contextData.length - 1; // default: latest day
+          renderContext();
+
+          document.getElementById("prevDay").onclick = () => {
+            if (ctxIndex > 0) {
+              ctxIndex--;
+              renderContext();
+            }
+          };
+
+          document.getElementById("nextDay").onclick = () => {
+            if (ctxIndex < contextData.length - 1) {
+              ctxIndex++;
+              renderContext();
+            }
+          };
+        })
+        .catch((err) => {
+          console.error("Failed to load context.json", err);
+        });
+    </script>
+
+    <script>
       Promise.all([
         fetch("./assets/predictions.json").then((r) => r.json()),
         fetch("./assets/context.json").then((r) => r.json()),
       ])
-        .then(([predictions, context]) => {
-          /* ---------- CONTEXT ---------- */
-          const ctxGrid = document.getElementById("contextGrid");
-          ctxGrid.innerHTML = `
-            <div>
-              <div class="context-label">Date</div>
-              <div class="context-value">${context.date}</div>
-            </div>
-            <div>
-              <div class="context-label">Ap index</div>
-              <div class="context-value">${context.geomagnetic.ap}</div>
-            </div>
-            <div>
-              <div class="context-label">Kp (max)</div>
-              <div class="context-value">${context.geomagnetic.kp_max}</div>
-            </div>
-            <div>
-              <div class="context-label">Cloud cover</div>
-              <div class="context-value">${context.weather.cloud_cover.toFixed(
-                1
-              )}%</div>
-            </div>
-            <div>
-              <div class="context-label">Precipitation</div>
-              <div class="context-value">${context.weather.precipitation.toFixed(
-                1
-              )} mm</div>
-            </div>
-          `;
+        .then(([predictions, contextArr]) => {
+          /* ---------------- CONTEXT NAVIGATION ---------------- */
 
-          /* ---------- CHART ---------- */
+          let ctxIndex = contextArr.length - 1; // start at latest day
+
+          const ctxDate = document.getElementById("ctxDate");
+          const ctxAp = document.getElementById("ctxAp");
+          const ctxKp = document.getElementById("ctxKp");
+          const ctxCloud = document.getElementById("ctxCloud");
+          const ctxRain = document.getElementById("ctxRain");
+
+          const prevBtn = document.getElementById("ctxPrev");
+          const nextBtn = document.getElementById("ctxNext");
+
+          function renderContext() {
+            const c = contextArr[ctxIndex];
+
+            ctxDate.textContent = c.date;
+            ctxAp.textContent = c.geomagnetic.ap.toFixed(1);
+            ctxKp.textContent = c.geomagnetic.kp_max.toFixed(1);
+            ctxCloud.textContent = `${c.weather.cloud_cover.toFixed(1)}%`;
+            ctxRain.textContent = `${c.weather.precipitation.toFixed(1)} mm`;
+
+            prevBtn.disabled = ctxIndex === 0;
+            nextBtn.disabled = ctxIndex === contextArr.length - 1;
+          }
+
+          prevBtn.onclick = () => {
+            if (ctxIndex > 0) {
+              ctxIndex--;
+              renderContext();
+            }
+          };
+
+          nextBtn.onclick = () => {
+            if (ctxIndex < contextArr.length - 1) {
+              ctxIndex++;
+              renderContext();
+            }
+          };
+
+          renderContext();
+
+          /* ---------------- PROBABILITY CHART ---------------- */
+
           const horizons = predictions.map((p) => `+${p.horizon_days}d`);
           const probs = predictions.map((p) => p.probability);
 
@@ -285,7 +388,8 @@
             }
           );
 
-          /* ---------- RISK CARDS ---------- */
+          /* ---------------- RISK CARDS ---------------- */
+
           const grid = document.getElementById("auroraRiskGrid");
 
           function category(p) {
@@ -300,12 +404,12 @@
             const div = document.createElement("div");
             div.className = "aurora-card";
             div.innerHTML = `
-              <div>Day +${p.horizon_days}</div>
-              <div class="aurora-risk ${c.cls}">
-                ${(p.probability * 100).toFixed(1)}%
-              </div>
-              <div>${c.label}</div>
-            `;
+          <div>Day +${p.horizon_days}</div>
+          <div class="aurora-risk ${c.cls}">
+            ${(p.probability * 100).toFixed(1)}%
+          </div>
+          <div>${c.label}</div>
+        `;
             grid.appendChild(div);
           });
         })

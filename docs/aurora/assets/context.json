@@ -1,11 +1,57 @@
-{
-  "date": "2026-01-04",
-  "geomagnetic": {
-    "ap": 4.0,
-    "kp_max": 3.0
+[
+  {
+    "date": "2026-01-01",
+    "geomagnetic": {
+      "ap": 11.0,
+      "kp_max": 3.3329999446868896
+    },
+    "weather": {
+      "cloud_cover": 100.0,
+      "precipitation": 14.700000762939453
+    }
   },
-  "weather": {
-    "cloud_cover": 89.75,
-    "precipitation": 0.6000000238418579
+  {
+    "date": "2026-01-02",
+    "geomagnetic": {
+      "ap": 24.0,
+      "kp_max": 5.0
+    },
+    "weather": {
+      "cloud_cover": 100.0,
+      "precipitation": 3.299999237060547
+    }
+  },
+  {
+    "date": "2026-01-03",
+    "geomagnetic": {
+      "ap": 10.0,
+      "kp_max": 3.0
+    },
+    "weather": {
+      "cloud_cover": 100.0,
+      "precipitation": 1.600000262260437
+    }
+  },
+  {
+    "date": "2026-01-04",
+    "geomagnetic": {
+      "ap": 4.0,
+      "kp_max": 3.0
+    },
+    "weather": {
+      "cloud_cover": 89.75,
+      "precipitation": 0.6000000238418579
+    }
+  },
+  {
+    "date": "2026-01-05",
+    "geomagnetic": {
+      "ap": 14.0,
+      "kp_max": 4.666999816894531
+    },
+    "weather": {
+      "cloud_cover": 76.41666412353516,
+      "precipitation": 0.0
+    }
   }
-}
+]
