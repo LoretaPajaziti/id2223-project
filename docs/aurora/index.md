@@ -1,3 +1,3 @@
-# Aurora Outlook (Sweden)
+<!-- # Aurora Outlook (Sweden) -->
 
 {% include aurora-dashboard.html %}
