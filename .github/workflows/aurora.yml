@@ -2,8 +2,8 @@ name: aurora-daily
 
 on:
   workflow_dispatch:
-    schedule:
-      - cron: "11 6 * * *"
+  schedule:
+    - cron: "11 6 * * *"
 
 jobs:
   schedule_pipelines:
@@ -37,11 +37,10 @@ jobs:
           cd notebooks/aurora
 
             # Book 2 – feature pipeline
-            jupyter nbconvert --to notebook --execute 2_feature_pipeline.ipynb
+            jupyter nbconvert --to notebook --execute 2_feature_pipeline_no_solar.ipynb
 
             # Book 4 – batch inference 
-            jupyter nbconvert --to notebook --execute 4_inference_pipeline.ipynb
-          done
+            jupyter nbconvert --to notebook --execute 4_inference_pipeline_no_solar.ipynb
 
       - name: github pages publish
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -49,7 +48,7 @@ jobs:
           commit_message: "Aurora Dashboard published"
           commit_options: "--no-verify --signoff"
 
-          file_pattern: "docs/aurora/assets/img/* docs/_includes/*"
+          file_pattern: "docs/aurora/assets/img/* docs/_includes/* docs/_data/predictions.json" 
 
           repository: .
 
