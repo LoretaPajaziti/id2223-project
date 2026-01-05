@@ -76,6 +76,40 @@ def check_file_path(file_path):
         print(f"File successfully found at the path: {file_path}")
 
 
+def update_kp_csv():
+    """
+    Download GFZ historical geomagnetic data and save it
+    as a CSV compatible with the existing kpdata.csv.
+
+    Source:
+    https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt
+    """
+
+    url = "https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt"
+
+    cols = [
+        "YYYY","MM","DD","days","days_m","BSR","dB",
+        "Kp1","Kp2","Kp3","Kp4","Kp5","Kp6","Kp7","Kp8",
+        "ap1","ap2","ap3","ap4","ap5","ap6","ap7","ap8",
+        "Ap","SN","F10.7obs","F10.7adj","D"
+    ]
+
+    df = pd.read_csv(
+        url,
+        delim_whitespace=True,
+        comment="#",
+        header=None,
+        names=cols,
+    )
+
+    # Guardar EXACTAMENTE como CSV clásico
+    df.to_csv("data/kpdata.csv", index=False)
+
+    return df
+
+
+    
+
 def get_kp(
     csv_path: str | Path,
     day: datetime.date,
