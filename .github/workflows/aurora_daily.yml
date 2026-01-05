@@ -48,7 +48,10 @@ jobs:
           commit_message: "Aurora Dashboard published"
           commit_options: "--no-verify --signoff"
 
-          file_pattern: "docs/aurora/assets/img/* docs/_includes/* docs/_data/predictions.json" 
+          file_pattern: |
+            docs/aurora/assets/predictions.json
+            docs/aurora/assets/*.json
+            docs/aurora/assets/img/*
 
           repository: .
 
