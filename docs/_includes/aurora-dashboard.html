@@ -90,6 +90,48 @@
         font-size: 1.3rem;
         font-weight: bold;
       }
+
+      .legend {
+        margin-top: 3rem;
+        padding: 1.8rem;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 16px;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      .legend h3 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        font-size: 1.2rem;
+        color: #c7cbff;
+      }
+
+      .legend code {
+        display: block;
+        margin-top: 0.6rem;
+        padding: 0.8rem;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 10px;
+        font-size: 0.8rem;
+        overflow-x: auto;
+        white-space: pre;
+        color: #d1d5ff;
+      }
+
+      .legend ul {
+        margin: 0.5rem 0 0.5rem 1.2rem;
+      }
+
+      .legend li {
+        margin-bottom: 0.3rem;
+      }
+
+      .legend .note {
+        margin-top: 1rem;
+        color: #9aa4ff;
+        font-style: italic;
+      }
     </style>
   </head>
 
@@ -114,6 +156,65 @@
 
       <!-- RISK CARDS -->
       <div class="aurora-grid" id="auroraRiskGrid"></div>
+
+      <div class="legend">
+        <h3>Data Used for Prediction</h3>
+
+        <p>
+          The aurora forecast is based on a combination of
+          <strong>geomagnetic</strong>, <strong>weather</strong>, and
+          <strong>solar activity</strong> data. The model estimates the
+          probability of <em>aurora-favorable geomagnetic conditions</em>
+          for each of the next 5 days.
+        </p>
+
+        <h4>Geomagnetic Data (Daily)</h4>
+        <p>
+          Derived from global geomagnetic indices describing Earth’s magnetic
+          activity. Each row corresponds to one day.
+        </p>
+
+        <code>
+          YYYY,MM,DD,days,days_m,BSR,dB, Kp1,Kp2,Kp3,Kp4,Kp5,Kp6,Kp7,Kp8,
+          ap1,ap2,ap3,ap4,ap5,ap6,ap7,ap8, Ap,SN,F10.7obs,F10.7adj,D
+        </code>
+
+        <ul>
+          <li><strong>Kp1–Kp8</strong>: 3-hour planetary Kp indices</li>
+          <li>
+            <strong>Ap</strong>: Daily geomagnetic activity index (linear scale)
+          </li>
+          <li><strong>SN</strong>: Sunspot number</li>
+          <li>
+            <strong>F10.7</strong>: Solar radio flux (proxy for solar activity)
+          </li>
+        </ul>
+
+        <h4>Weather Data (Local, Sweden)</h4>
+        <ul>
+          <li><strong>Cloud cover (%)</strong></li>
+          <li><strong>Precipitation (mm)</strong></li>
+          <li><strong>Sunshine duration</strong></li>
+        </ul>
+
+        <p>
+          Weather conditions affect <em>visibility</em> but not aurora
+          generation. They are included to contextualize viewing conditions.
+        </p>
+
+        <h4>Solar Wind Data (Training & Evaluation)</h4>
+        <p>
+          Solar wind parameters (e.g. velocity, magnetic field Bz, dynamic
+          pressure) were also tested during model development. These variables
+          help capture upstream solar-terrestrial interactions that drive
+          geomagnetic storms.
+        </p>
+
+        <div class="note">
+          Prediction categories (e.g. “Likely”, “Very likely”) are derived from
+          model probabilities and do not represent direct observations.
+        </div>
+      </div>
 
       <div class="aurora-footer">
         Forecast based on geomagnetic, solar-wind, and weather data processed by
