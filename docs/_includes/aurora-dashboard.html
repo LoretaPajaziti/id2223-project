@@ -224,8 +224,8 @@
 
     <script>
       Promise.all([
-        fetch("/docs/aurora/assets/predictions.json").then((r) => r.json()),
-        fetch("/docs/aurora/assets/context.json").then((r) => r.json()),
+        fetch("./assets/predictions.json").then((r) => r.json()),
+        fetch("./assets/context.json").then((r) => r.json()),
       ])
         .then(([predictions, context]) => {
           console.log("Predictions:", predictions);
