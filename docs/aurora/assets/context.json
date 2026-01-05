@@ -1,0 +1,11 @@
+{
+  "date": "2026-01-04",
+  "geomagnetic": {
+    "ap": 4.0,
+    "kp_max": 3.0
+  },
+  "weather": {
+    "cloud_cover": 89.75,
+    "precipitation": 0.6000000238418579
+  }
+}
