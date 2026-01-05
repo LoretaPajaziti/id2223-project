@@ -103,9 +103,9 @@ def update_kp_csv():
     )
 
     # Guardar EXACTAMENTE como CSV clásico
-    df.to_csv("data/kpdata.csv", index=False)
+    df.to_csv("../../data/kpdata.csv", index=False)
 
-    return df
+    return
 
 
     
