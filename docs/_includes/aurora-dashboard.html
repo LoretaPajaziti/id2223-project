@@ -224,13 +224,20 @@
 
     <script>
       Promise.all([
-        fetch("./assets/predictions.json").then((r) => r.json()),
-        fetch("./assets/context.json").then((r) => r.json()),
+        fetch("/docs/aurora/assets/predictions.json").then((r) => r.json()),
+        fetch("/docs/aurora/assets/context.json").then((r) => r.json()),
       ])
         .then(([predictions, context]) => {
-          /* ================= CONTEXT (latest + arrows) ================= */
-          let ctxIndex = context.length - 1; // start at latest day
+          console.log("Predictions:", predictions);
+          console.log("Context:", context);
 
+          /* ================= CONTEXT ================= */
+          if (!Array.isArray(context) || context.length === 0) {
+            console.error("Context data is empty or invalid");
+            return;
+          }
+
+          let ctxIndex = context.length - 1; // latest day
           const ctxGrid = document.getElementById("contextGrid");
 
           function renderContext() {
@@ -296,6 +303,7 @@
 
           /* ================= RISK CARDS ================= */
           const grid = document.getElementById("auroraRiskGrid");
+          grid.innerHTML = "";
 
           function category(p) {
             if (p < 0.2) return { label: "Very unlikely", cls: "very-low" };
