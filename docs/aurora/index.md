@@ -1,4 +1,3 @@
-# Air Quality Dashboard
+# Aurora Outlook (Sweden)
 
 {% include aurora-dashboard.html %}
-
