@@ -132,6 +132,27 @@
         color: #9aa4ff;
         font-style: italic;
       }
+
+      button#ctxPrev,
+      button#ctxNext {
+        background: rgba(255, 255, 255, 0.08);
+        border: none;
+        color: #eaeaf0;
+        border-radius: 8px;
+        padding: 0.3rem 0.6rem;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+
+      button#ctxPrev:hover,
+      button#ctxNext:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
     </style>
   </head>
 
@@ -145,8 +166,30 @@
 
       <!-- CURRENT CONDITIONS -->
       <div class="aurora-card">
-        <h3>Latest Conditions</h3>
-        <div class="context-grid" id="contextGrid"></div>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          "
+        >
+          <h3 style="margin: 0">Latest Conditions</h3>
+
+          <div style="display: flex; gap: 0.6rem; align-items: center">
+            <button id="ctxPrev" aria-label="Previous day">◀</button>
+            <span
+              id="ctxCounter"
+              style="font-size: 0.9rem; color: #9aa4ff"
+            ></span>
+            <button id="ctxNext" aria-label="Next day">▶</button>
+          </div>
+        </div>
+
+        <div
+          class="context-grid"
+          id="contextGrid"
+          style="margin-top: 1rem"
+        ></div>
       </div>
 
       <!-- FORECAST PLOT -->
@@ -239,37 +282,55 @@
 
           let ctxIndex = context.length - 1; // latest day
           const ctxGrid = document.getElementById("contextGrid");
+          const btnPrev = document.getElementById("ctxPrev");
+          const btnNext = document.getElementById("ctxNext");
+          const ctxCounter = document.getElementById("ctxCounter");
 
           function renderContext() {
             const c = context[ctxIndex];
 
             ctxGrid.innerHTML = `
-          <div>
-            <div class="context-label">Date</div>
-            <div class="context-value">${c.date}</div>
-          </div>
-          <div>
-            <div class="context-label">Ap index</div>
-            <div class="context-value">${c.geomagnetic.ap.toFixed(1)}</div>
-          </div>
-          <div>
-            <div class="context-label">Kp (max)</div>
-            <div class="context-value">${c.geomagnetic.kp_max.toFixed(1)}</div>
-          </div>
-          <div>
-            <div class="context-label">Cloud cover</div>
-            <div class="context-value">${c.weather.cloud_cover.toFixed(
-              1
-            )}%</div>
-          </div>
-          <div>
-            <div class="context-label">Precipitation</div>
-            <div class="context-value">${c.weather.precipitation.toFixed(
-              1
-            )} mm</div>
-          </div>
-        `;
+    <div>
+      <div class="context-label">Date</div>
+      <div class="context-value">${c.date}</div>
+    </div>
+    <div>
+      <div class="context-label">Ap index</div>
+      <div class="context-value">${c.geomagnetic.ap.toFixed(1)}</div>
+    </div>
+    <div>
+      <div class="context-label">Kp (max)</div>
+      <div class="context-value">${c.geomagnetic.kp_max.toFixed(1)}</div>
+    </div>
+    <div>
+      <div class="context-label">Cloud cover</div>
+      <div class="context-value">${c.weather.cloud_cover.toFixed(1)}%</div>
+    </div>
+    <div>
+      <div class="context-label">Precipitation</div>
+      <div class="context-value">${c.weather.precipitation.toFixed(1)} mm</div>
+    </div>
+  `;
+
+            ctxCounter.textContent = `${ctxIndex + 1} / ${context.length}`;
+
+            btnPrev.disabled = ctxIndex === 0;
+            btnNext.disabled = ctxIndex === context.length - 1;
           }
+
+          btnPrev.addEventListener("click", () => {
+            if (ctxIndex > 0) {
+              ctxIndex--;
+              renderContext();
+            }
+          });
+
+          btnNext.addEventListener("click", () => {
+            if (ctxIndex < context.length - 1) {
+              ctxIndex++;
+              renderContext();
+            }
+          });
 
           renderContext();
 
