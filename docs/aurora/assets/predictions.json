@@ -1,0 +1,27 @@
+[
+  {
+    "timestamp":1767484800000,
+    "horizon_days":1,
+    "probability":0.2821690142
+  },
+  {
+    "timestamp":1767571200000,
+    "horizon_days":2,
+    "probability":0.1608481407
+  },
+  {
+    "timestamp":1767657600000,
+    "horizon_days":3,
+    "probability":0.0813846886
+  },
+  {
+    "timestamp":1767744000000,
+    "horizon_days":4,
+    "probability":0.2193175405
+  },
+  {
+    "timestamp":1767830400000,
+    "horizon_days":5,
+    "probability":0.2983340621
+  }
+]

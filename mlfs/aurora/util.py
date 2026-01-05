@@ -150,6 +150,7 @@ def get_kp(
 
 
 def get_latest_complete_kp_from_nowcast() -> pd.DataFrame:
+    # Return 7 days so we can do the lag features calculation
     import pandas as pd
     import requests
     from io import StringIO
@@ -181,11 +182,13 @@ def get_latest_complete_kp_from_nowcast() -> pd.DataFrame:
     df["date"] = pd.to_datetime(
         dict(year=df.YYYY, month=df.MM, day=df.DD)
     )
+    
+    df_last_7 = df.sort_values("date").tail(7)
 
-    today = pd.Timestamp(datetime.date.today())
+    #today = pd.Timestamp(datetime.date.today())
 
     # 1) only completed days
-    df = df[df["date"] < today]
+    #df = df[df["date"] < today]
 
     # 2) drop rows with missing (-1) geomagnetic values
     geomagnetic_cols = (
@@ -195,15 +198,29 @@ def get_latest_complete_kp_from_nowcast() -> pd.DataFrame:
     )
 
     for col in geomagnetic_cols:
-        df = df[df[col] >= 0]
+        df_last_7 = df_last_7[df_last_7[col] >= 0]
 
-    if df.empty:
+    if df_last_7.empty:
         raise ValueError("No complete geomagnetic day available in nowcast file")
 
-    # Latest valid day
-    row = df.sort_values("date").iloc[-1]
+    df_last_7 = df_last_7.sort_values("date")
+    
+    #df_last_7["ap"] = df_last_7["Ap"].astype("float32")
+    df_last_7.columns = [c.lower() for c in df_last_7.columns]
 
-    out = pd.DataFrame(
+    out = df_last_7[
+        [
+            "date",
+            "kp1","kp2","kp3","kp4","kp5","kp6","kp7","kp8",
+            "ap1","ap2","ap3","ap4","ap5","ap6","ap7","ap8",
+            "ap",
+        ]
+    ].copy()
+
+    # Latest valid day
+    #row = df_last_7.sort_values("date").iloc[-1]
+
+    """ out = pd.DataFrame(
         {
             "date": [row.date],
             "kp1": [row.Kp1],
@@ -224,7 +241,7 @@ def get_latest_complete_kp_from_nowcast() -> pd.DataFrame:
             "ap8": [row.ap8],
             "ap": [row.Ap],
         }
-    )
+    ) """
 
     for col in out.columns:
         if col != "date":
@@ -301,4 +318,21 @@ def solar_feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
     print(f"🧹 Dropped {before - after} rows due to NaNs")
     print(f"📊 Remaining rows: {after}")
     
+    return df
+
+
+def geomagnetic_feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
+    
+    order = df["date"].sort_values().index
+    df = df.loc[order].reset_index(drop=True)
+
+    # Lagged Kp features (daily mean + max are most informative)
+    kp_cols = [f"kp{i}" for i in range(1, 9)]
+    df["kp_mean"] = df[kp_cols].mean(axis=1)
+    df["kp_max"] = df[kp_cols].max(axis=1)
+
+    for lag in [1, 2, 3]:
+        df[f"kp_mean_lag_{lag}"] = df["kp_mean"].shift(lag)
+        df[f"kp_max_lag_{lag}"] = df["kp_max"].shift(lag)
+
     return df

@@ -1,0 +1,133 @@
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  .aurora-dashboard {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: radial-gradient(circle at top, #0b1020, #05060d);
+    color: #eaeaf0;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    max-width: 1100px;
+    margin: 3rem auto;
+  }
+
+  .aurora-dashboard h1 {
+    font-size: 2.4rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .aurora-subtitle {
+    color: #9aa4ff;
+    margin-bottom: 2rem;
+  }
+
+  .aurora-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+
+  .aurora-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .aurora-risk {
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
+
+  .low { color: #4ade80; }
+  .moderate { color: #facc15; }
+  .high { color: #f87171; }
+
+  .aurora-footer {
+    margin-top: 2.5rem;
+    font-size: 0.85rem;
+    color: #8a8fae;
+  }
+</style>
+
+<div class="aurora-dashboard">
+  <h1>Aurora Risk Outlook</h1>
+  <div class="aurora-subtitle">
+    Probabilistic geomagnetic forecast for the next 5 days
+  </div>
+
+  <!-- Plot -->
+  <div class="aurora-card">
+    <canvas id="auroraProbChart" height="90"></canvas>
+  </div>
+
+  <!-- Risk cards -->
+  <div class="aurora-grid" id="auroraRiskGrid"></div>
+
+  <div class="aurora-footer">
+    Forecast based on geomagnetic indices processed through
+    a machine-learning classification model.  
+    Confidence decreases with forecast horizon.
+  </div>
+</div>
+
+<script>
+  const predictions = {{ site.data.predictions | jsonify }};
+
+  const horizons = predictions.map(p => `+${p.horizon_days}d`);
+  const probs = predictions.map(p => p.probability);
+
+  // ---- Line chart ----
+  const ctx = document
+    .getElementById("auroraProbChart")
+    .getContext("2d");
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: horizons,
+      datasets: [{
+        data: probs,
+        borderColor: "#9aa4ff",
+        backgroundColor: "rgba(154,164,255,0.25)",
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, max: 1 }
+      }
+    }
+  });
+
+  // ---- Risk cards ----
+  const grid = document.getElementById("auroraRiskGrid");
+
+  function riskClass(p) {
+    if (p < 0.15) return "low";
+    if (p < 0.3) return "moderate";
+    return "high";
+  }
+
+  predictions.forEach(p => {
+    const level =
+      p.probability < 0.15 ? "Low" :
+      p.probability < 0.3 ? "Moderate" : "High";
+
+    const div = document.createElement("div");
+    div.className = "aurora-card";
+    div.innerHTML = `
+      <div>Day +${p.horizon_days}</div>
+      <div class="aurora-risk ${riskClass(p.probability)}">
+        ${(p.probability * 100).toFixed(1)}%
+      </div>
+      <div>${level} activity</div>
+    `;
+    grid.appendChild(div);
+  });
+</script>
