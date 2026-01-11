@@ -1,27 +1,27 @@
 [
   {
-    "timestamp":1767484800000,
+    "timestamp":1768003200000,
     "horizon_days":1,
-    "probability":0.2125249505
+    "probability":0.2000199109
   },
   {
-    "timestamp":1767571200000,
+    "timestamp":1768089600000,
     "horizon_days":2,
-    "probability":0.396928072
+    "probability":0.3506129682
   },
   {
-    "timestamp":1767657600000,
+    "timestamp":1768176000000,
     "horizon_days":3,
-    "probability":0.4322256148
+    "probability":0.4408966005
   },
   {
-    "timestamp":1767744000000,
+    "timestamp":1768262400000,
     "horizon_days":4,
-    "probability":0.4627504051
+    "probability":0.3572839797
   },
   {
-    "timestamp":1767830400000,
+    "timestamp":1768348800000,
     "horizon_days":5,
-    "probability":0.5585470796
+    "probability":0.3854760528
   }
 ]
